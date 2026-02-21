@@ -1,0 +1,4 @@
+LOCALITY_NEIGHBOUR_PID|DATE_CREATED|DATE_RETIRED|LOCALITY_PID|NEIGHBOUR_LOCALITY_PID
+locneigh_001|2021-07-06||loc_test_001|loc_test_002
+locneigh_002|2021-07-06||loc_test_002|loc_test_003
+locneigh_003|2021-07-06||loc_test_003|loc_test_001

@@ -57,7 +57,9 @@ def load_authority_codes(db_name='gnaf_addresses.db', silent_mode=False):
         print("\n=== Loading Authority Code Tables (16) ===")
 
     # Initialize progress tracker for authority codes (pre-scans files to count total rows)
-    progress = AuthorityProgressTracker(AUTHORITY_CODE_TABLES, AUTHORITY_CODE_DIR)
+    # Disable progress in test environment to avoid cluttering test output
+    show_progress = os.environ.get('GNAF_SHOW_PROGRESS', '1') == '1'
+    progress = AuthorityProgressTracker(AUTHORITY_CODE_TABLES, AUTHORITY_CODE_DIR) if show_progress else None
 
     for table_index, table_name in enumerate(AUTHORITY_CODE_TABLES):
         file_path = os.path.join(AUTHORITY_CODE_DIR, f'Authority_Code_{table_name}_psv.psv')
@@ -92,7 +94,8 @@ def load_authority_codes(db_name='gnaf_addresses.db', silent_mode=False):
                         count += rows_inserted
 
                         # Update progress tracker
-                        progress.update(table_name, table_index, rows_inserted)
+                        if progress:
+                            progress.update(table_name, table_index, rows_inserted)
 
                         batch = []
                     except sqlite3.IntegrityError as e:
@@ -113,7 +116,7 @@ def load_authority_codes(db_name='gnaf_addresses.db', silent_mode=False):
                                     print(f"  Skipped row due to integrity error")
 
                         # Update progress tracker for row-by-row batch
-                        if batch_rows_inserted > 0:
+                        if batch_rows_inserted > 0 and progress:
                             progress.update(table_name, table_index, batch_rows_inserted)
 
                         batch = []
@@ -129,7 +132,8 @@ def load_authority_codes(db_name='gnaf_addresses.db', silent_mode=False):
                     count += rows_inserted
 
                     # Update progress tracker for final batch
-                    progress.update(table_name, table_index, rows_inserted)
+                    if progress:
+                        progress.update(table_name, table_index, rows_inserted)
                 except sqlite3.IntegrityError as e:
                     # Fall back to row-by-row for final batch
                     batch_rows_inserted = 0
@@ -146,7 +150,7 @@ def load_authority_codes(db_name='gnaf_addresses.db', silent_mode=False):
                             skipped += 1
 
                     # Update progress tracker for final row-by-row batch
-                    if batch_rows_inserted > 0:
+                    if batch_rows_inserted > 0 and progress:
                         progress.update(table_name, table_index, batch_rows_inserted)
 
             conn.commit()
@@ -154,7 +158,8 @@ def load_authority_codes(db_name='gnaf_addresses.db', silent_mode=False):
                 print(f"  Loaded {count} rows into {table_name}")
 
     # Finish progress tracking (prints final newline)
-    progress.finish()
+    if progress:
+        progress.finish()
 
     conn.close()
     if not silent_mode:
@@ -187,7 +192,9 @@ def load_data(state, db_name='gnaf_addresses.db', silent_mode=False):
         print(f"\n=== Loading State Tables for {state} (19 tables) ===")
 
     # Initialize progress tracker (pre-scans files to count total rows)
-    progress = ProgressTracker(state, STATE_TABLES_ORDERED, DATA_DIR)
+    # Disable progress in test environment to avoid cluttering test output
+    show_progress = os.environ.get('GNAF_SHOW_PROGRESS', '1') == '1'
+    progress = ProgressTracker(state, STATE_TABLES_ORDERED, DATA_DIR) if show_progress else None
 
     # Load all state tables in dependency order
     for table_index, table_name in enumerate(STATE_TABLES_ORDERED):
@@ -236,7 +243,8 @@ def load_data(state, db_name='gnaf_addresses.db', silent_mode=False):
                         count += rows_inserted
 
                         # Update progress tracker
-                        progress.update(table_name, table_index, rows_inserted)
+                        if progress:
+                            progress.update(table_name, table_index, rows_inserted)
 
                         batch = []
 
@@ -265,7 +273,7 @@ def load_data(state, db_name='gnaf_addresses.db', silent_mode=False):
                                     print("  Further integrity errors will not be shown...")
 
                         # Update progress tracker for row-by-row batch
-                        if batch_rows_inserted > 0:
+                        if batch_rows_inserted > 0 and progress:
                             progress.update(table_name, table_index, batch_rows_inserted)
 
                         batch = []
@@ -281,7 +289,8 @@ def load_data(state, db_name='gnaf_addresses.db', silent_mode=False):
                     count += rows_inserted
 
                     # Update progress tracker for final batch
-                    progress.update(table_name, table_index, rows_inserted)
+                    if progress:
+                        progress.update(table_name, table_index, rows_inserted)
                 except sqlite3.IntegrityError as e:
                     # Fall back to row-by-row for final batch
                     batch_rows_inserted = 0
@@ -298,7 +307,7 @@ def load_data(state, db_name='gnaf_addresses.db', silent_mode=False):
                             skipped += 1
 
                     # Update progress tracker for final row-by-row batch
-                    if batch_rows_inserted > 0:
+                    if batch_rows_inserted > 0 and progress:
                         progress.update(table_name, table_index, batch_rows_inserted)
 
             conn.commit()
@@ -306,7 +315,8 @@ def load_data(state, db_name='gnaf_addresses.db', silent_mode=False):
                 print(f"  Completed: {count} rows for {state} in {table_name} (skipped {skipped})")
 
     # Finish progress tracking (prints final newline)
-    progress.finish()
+    if progress:
+        progress.finish()
 
     conn.close()
     if not silent_mode:

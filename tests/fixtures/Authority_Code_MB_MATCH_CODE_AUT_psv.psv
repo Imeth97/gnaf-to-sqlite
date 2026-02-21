@@ -1,0 +1,4 @@
+CODE|NAME|DESCRIPTION
+1|PARCEL LEVEL MATCH|A parcel level geocode for the address has been applied and clearly within the boundaries of a single mesh block
+2|ADDRESS LEVEL MATCH|Address level geocode applied
+3|LOCALITY MATCH|Locality level match applied
