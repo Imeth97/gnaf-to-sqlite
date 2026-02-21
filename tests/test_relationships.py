@@ -8,9 +8,9 @@ from load_data import load_data, load_authority_codes
 @pytest.fixture
 def loaded_db(mock_data_dir, clean_test_db):
     """Create a fully populated test database."""
-    create_database(clean_test_db, reference_state='TEST')
-    load_authority_codes(clean_test_db)
-    load_data('TEST', clean_test_db)
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
+    load_authority_codes(clean_test_db, authority_code_dir=mock_data_dir)
+    load_data('TEST', clean_test_db, data_dir=mock_data_dir)
     return clean_test_db
 
 

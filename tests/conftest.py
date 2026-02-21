@@ -26,16 +26,8 @@ def tmp_db_path(tmp_path):
 
 
 @pytest.fixture
-def mock_data_dir(test_fixtures_dir, monkeypatch):
-    """Mock DATA_DIR and AUTHORITY_CODE_DIR constants to point to test fixtures."""
-    import create_database as create_db
-    import load_data as load_data_module
-
-    monkeypatch.setattr(create_db, 'DATA_DIR', test_fixtures_dir)
-    monkeypatch.setattr(create_db, 'AUTHORITY_CODE_DIR', test_fixtures_dir)
-    monkeypatch.setattr(load_data_module, 'DATA_DIR', test_fixtures_dir)
-    monkeypatch.setattr(load_data_module, 'AUTHORITY_CODE_DIR', test_fixtures_dir)
-
+def mock_data_dir(test_fixtures_dir):
+    """Return test fixtures directory (no longer needs monkeypatch since we pass paths as parameters)."""
     return test_fixtures_dir
 
 
@@ -59,9 +51,9 @@ def full_test_db(mock_data_dir, clean_test_db):
     from create_database import create_database
     from load_data import load_authority_codes, load_data
 
-    create_database(clean_test_db, reference_state='TEST')
-    load_authority_codes(clean_test_db)
-    load_data('TEST', clean_test_db)
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
+    load_authority_codes(clean_test_db, authority_code_dir=mock_data_dir)
+    load_data('TEST', clean_test_db, data_dir=mock_data_dir)
 
     return clean_test_db
 
@@ -155,14 +147,6 @@ def multi_state_fixtures_dir(test_fixtures_dir, tmp_path):
 
 
 @pytest.fixture
-def mock_multi_state_dir(multi_state_fixtures_dir, monkeypatch):
-    """Mock DATA_DIR and AUTHORITY_CODE_DIR to the multi-state fixtures directory."""
-    import create_database as create_db
-    import load_data as load_data_module
-
-    monkeypatch.setattr(create_db, 'DATA_DIR', multi_state_fixtures_dir)
-    monkeypatch.setattr(create_db, 'AUTHORITY_CODE_DIR', multi_state_fixtures_dir)
-    monkeypatch.setattr(load_data_module, 'DATA_DIR', multi_state_fixtures_dir)
-    monkeypatch.setattr(load_data_module, 'AUTHORITY_CODE_DIR', multi_state_fixtures_dir)
-
+def mock_multi_state_dir(multi_state_fixtures_dir):
+    """Return multi-state fixtures directory (no longer needs monkeypatch since we pass paths as parameters)."""
     return multi_state_fixtures_dir

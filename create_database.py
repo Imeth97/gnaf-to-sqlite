@@ -2,10 +2,6 @@ import os
 import sqlite3
 import csv
 
-# Constants
-DATA_DIR = 'g-naf_nov25_allstates_gda2020_psv_1021/G-NAF/G-NAF NOVEMBER 2025/Standard'
-AUTHORITY_CODE_DIR = 'g-naf_nov25_allstates_gda2020_psv_1021/G-NAF/G-NAF NOVEMBER 2025/Authority Code'
-
 STATES = ['ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA', 'OT']
 
 # Authority code tables - NO STATE column, load once
@@ -182,7 +178,7 @@ def create_table_from_psv_header(cursor, table_name, psv_path, include_state_col
         print(f"Created table: {table_name}{fk_note}")
 
 
-def create_database(db_name='gnaf_addresses.db', reference_state='ACT'):
+def create_database(db_name='gnaf_addresses.db', data_dir=None, authority_code_dir=None, reference_state='ACT'):
     """Create a new SQLite database with unified schema for all states.
 
     Creates 35 tables total:
@@ -193,8 +189,14 @@ def create_database(db_name='gnaf_addresses.db', reference_state='ACT'):
 
     Args:
         db_name: Path to the database file to create
+        data_dir: Path to the Standard data directory
+        authority_code_dir: Path to the Authority Code directory
         reference_state: State to use for reading PSV headers (default: 'ACT')
     """
+    if data_dir is None:
+        raise ValueError("data_dir parameter is required")
+    if authority_code_dir is None:
+        raise ValueError("authority_code_dir parameter is required")
     # Remove existing database if it exists
     if os.path.exists(db_name):
         os.remove(db_name)
@@ -207,14 +209,14 @@ def create_database(db_name='gnaf_addresses.db', reference_state='ACT'):
     print("\n=== Creating Authority Code Tables (16) ===")
     # Create authority code tables first (no dependencies, no STATE column)
     for table_name in AUTHORITY_CODE_TABLES:
-        psv_path = os.path.join(AUTHORITY_CODE_DIR, f'Authority_Code_{table_name}_psv.psv')
+        psv_path = os.path.join(authority_code_dir, f'Authority_Code_{table_name}_psv.psv')
         create_table_from_psv_header(cursor, table_name, psv_path, include_state_column=False)
 
     print("\n=== Creating State Tables (19) ===")
     # Create state tables in dependency order (with STATE column)
     # Foreign keys are included in CREATE TABLE statements
     for table_name in STATE_TABLES_ORDERED:
-        psv_path = os.path.join(DATA_DIR, f'{reference_state}_{table_name}_psv.psv')
+        psv_path = os.path.join(data_dir, f'{reference_state}_{table_name}_psv.psv')
         create_table_from_psv_header(cursor, table_name, psv_path, include_state_column=True)
 
     # Enable WAL mode for better concurrent write support

@@ -8,14 +8,14 @@ from load_data import load_data, load_authority_codes
 @pytest.fixture
 def prepared_db(mock_data_dir, clean_test_db):
     """Create a database with schema and authority codes loaded (but no state data)."""
-    create_database(clean_test_db, reference_state='TEST')
-    load_authority_codes(clean_test_db)
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
+    load_authority_codes(clean_test_db, authority_code_dir=mock_data_dir)
     return clean_test_db
 
 
 def test_load_locality_data(mock_data_dir, prepared_db):
     """Test that LOCALITY data is loaded correctly."""
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -38,7 +38,7 @@ def test_load_locality_data(mock_data_dir, prepared_db):
 
 def test_load_street_locality_data(mock_data_dir, prepared_db):
     """Test that STREET_LOCALITY data is loaded correctly."""
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -62,7 +62,7 @@ def test_load_street_locality_data(mock_data_dir, prepared_db):
 
 def test_load_address_detail_data(mock_data_dir, prepared_db):
     """Test that ADDRESS_DETAIL data is loaded correctly."""
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -87,7 +87,7 @@ def test_load_address_detail_data(mock_data_dir, prepared_db):
 def test_foreign_key_enforcement(mock_data_dir, prepared_db):
     """Test that foreign key constraints are enforced during loading."""
     # First load the data normally
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     conn.execute("PRAGMA foreign_keys = ON")
@@ -115,7 +115,7 @@ def test_foreign_key_enforcement(mock_data_dir, prepared_db):
 def test_duplicate_pk_handling(mock_data_dir, prepared_db):
     """Test that duplicate primary keys are handled (skipped)."""
     # Load data once
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -126,7 +126,7 @@ def test_duplicate_pk_handling(mock_data_dir, prepared_db):
     conn.close()
 
     # Load data again - duplicates should be skipped
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -142,7 +142,7 @@ def test_duplicate_pk_handling(mock_data_dir, prepared_db):
 
 def test_empty_fields(mock_data_dir, prepared_db):
     """Test that empty PSV fields are handled correctly (stored as NULL)."""
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -170,7 +170,7 @@ def test_empty_fields(mock_data_dir, prepared_db):
 
 def test_encoding_utf8(mock_data_dir, prepared_db):
     """Test that UTF-8 encoding is handled correctly."""
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -198,7 +198,7 @@ def test_loading_order(mock_data_dir, prepared_db):
     conn.close()
 
     # Should complete without foreign key errors
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -223,8 +223,8 @@ def test_loading_order(mock_data_dir, prepared_db):
 def test_load_authority_codes(mock_data_dir, clean_test_db):
     """Test that authority code tables are loaded with correct row counts."""
     from create_database import create_database
-    create_database(clean_test_db, reference_state='TEST')
-    load_authority_codes(clean_test_db)
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
+    load_authority_codes(clean_test_db, authority_code_dir=mock_data_dir)
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -240,8 +240,8 @@ def test_load_authority_codes(mock_data_dir, clean_test_db):
 def test_authority_codes_no_state_column_data(mock_data_dir, clean_test_db):
     """Test that authority code data has no STATE column and loads correctly."""
     from create_database import create_database
-    create_database(clean_test_db, reference_state='TEST')
-    load_authority_codes(clean_test_db)
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
+    load_authority_codes(clean_test_db, authority_code_dir=mock_data_dir)
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -262,7 +262,7 @@ def test_authority_codes_no_state_column_data(mock_data_dir, clean_test_db):
 
 def test_load_all_19_state_tables(mock_data_dir, prepared_db):
     """Test that all 19 state tables are loaded with data for TEST state."""
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -277,7 +277,7 @@ def test_load_all_19_state_tables(mock_data_dir, prepared_db):
 
 def test_state_column_populated(mock_data_dir, prepared_db):
     """Test that the STATE column is correctly populated for all state tables."""
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -301,7 +301,7 @@ def test_load_order_dependency(mock_data_dir, prepared_db):
     ]
 
     # Load all state data in order
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -317,10 +317,10 @@ def test_load_order_dependency(mock_data_dir, prepared_db):
 def test_authority_codes_idempotent(mock_data_dir, clean_test_db):
     """Test that loading authority codes twice doesn't duplicate rows (INSERT OR IGNORE)."""
     from create_database import create_database
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
-    load_authority_codes(clean_test_db)
-    load_authority_codes(clean_test_db)  # Load again
+    load_authority_codes(clean_test_db, authority_code_dir=mock_data_dir)
+    load_authority_codes(clean_test_db, authority_code_dir=mock_data_dir)  # Load again
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -335,7 +335,7 @@ def test_authority_codes_idempotent(mock_data_dir, clean_test_db):
 
 def test_all_tables_have_data_after_full_load(mock_data_dir, prepared_db):
     """Test that all 35 tables have data after loading authority codes and state """
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -357,7 +357,7 @@ def test_all_tables_have_data_after_full_load(mock_data_dir, prepared_db):
 
 def test_address_detail_site_fk(mock_data_dir, prepared_db):
     """Test that ADDRESS_DETAIL.ADDRESS_SITE_PID references valid ADDRESS_SITE rows."""
-    load_data('TEST', prepared_db)
+    load_data('TEST', prepared_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(prepared_db)
     cursor = conn.cursor()
@@ -379,10 +379,10 @@ def test_address_detail_site_fk(mock_data_dir, prepared_db):
 def test_multi_state_load_isolation(mock_multi_state_dir, clean_test_db):
     """Test that loading two states doesn't mix data (STATE column isolates them)."""
     from create_database import create_database
-    create_database(clean_test_db, reference_state='TEST')
-    load_authority_codes(clean_test_db)
-    load_data('TEST', clean_test_db)
-    load_data('OT1', clean_test_db)
+    create_database(clean_test_db, data_dir=mock_multi_state_dir, authority_code_dir=mock_multi_state_dir, reference_state='TEST')
+    load_authority_codes(clean_test_db, authority_code_dir=mock_multi_state_dir)
+    load_data('TEST', clean_test_db, data_dir=mock_multi_state_dir)
+    load_data('OT1', clean_test_db, data_dir=mock_multi_state_dir)
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()

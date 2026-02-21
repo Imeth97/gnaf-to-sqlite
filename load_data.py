@@ -3,10 +3,6 @@ import sqlite3
 import csv
 from progress_tracker import ProgressTracker, AuthorityProgressTracker
 
-# Constants
-DATA_DIR = 'g-naf_nov25_allstates_gda2020_psv_1021/G-NAF/G-NAF NOVEMBER 2025/Standard'
-AUTHORITY_CODE_DIR = 'g-naf_nov25_allstates_gda2020_psv_1021/G-NAF/G-NAF NOVEMBER 2025/Authority Code'
-
 # Authority code tables - NO STATE column, load once
 AUTHORITY_CODE_TABLES = [
     'ADDRESS_ALIAS_TYPE_AUT', 'ADDRESS_CHANGE_TYPE_AUT', 'ADDRESS_TYPE_AUT',
@@ -34,7 +30,7 @@ STATE_TABLES_ORDERED = [
 ]
 
 
-def load_authority_codes(db_name='gnaf_addresses.db', silent_mode=False):
+def load_authority_codes(db_name='gnaf_addresses.db', authority_code_dir=None, silent_mode=False):
     """Load authority code tables once (not per state).
 
     These are reference/lookup tables that apply to all states.
@@ -42,8 +38,11 @@ def load_authority_codes(db_name='gnaf_addresses.db', silent_mode=False):
 
     Args:
         db_name: Path to the database file
+        authority_code_dir: Path to the Authority Code directory
         silent_mode: If True, suppress progress messages
     """
+    if authority_code_dir is None:
+        raise ValueError("authority_code_dir parameter is required")
     conn = sqlite3.connect(db_name, timeout=600.0)
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode=WAL")
@@ -59,10 +58,10 @@ def load_authority_codes(db_name='gnaf_addresses.db', silent_mode=False):
     # Initialize progress tracker for authority codes (pre-scans files to count total rows)
     # Disable progress in test environment to avoid cluttering test output
     show_progress = os.environ.get('GNAF_SHOW_PROGRESS', '1') == '1'
-    progress = AuthorityProgressTracker(AUTHORITY_CODE_TABLES, AUTHORITY_CODE_DIR) if show_progress else None
+    progress = AuthorityProgressTracker(AUTHORITY_CODE_TABLES, authority_code_dir) if show_progress else None
 
     for table_index, table_name in enumerate(AUTHORITY_CODE_TABLES):
-        file_path = os.path.join(AUTHORITY_CODE_DIR, f'Authority_Code_{table_name}_psv.psv')
+        file_path = os.path.join(authority_code_dir, f'Authority_Code_{table_name}_psv.psv')
         if not silent_mode:
             print(f"Loading authority code table {table_name}...")
 
@@ -166,7 +165,7 @@ def load_authority_codes(db_name='gnaf_addresses.db', silent_mode=False):
         print("=== Authority code tables loaded successfully ===\n")
 
 
-def load_data(state, db_name='gnaf_addresses.db', silent_mode=False):
+def load_data(state, db_name='gnaf_addresses.db', data_dir=None, silent_mode=False):
     """Load data from PSV files into the unified SQLite database.
 
     Loads all 19 state tables in dependency order for the specified state.
@@ -175,8 +174,11 @@ def load_data(state, db_name='gnaf_addresses.db', silent_mode=False):
     Args:
         state: State abbreviation (e.g., 'ACT', 'NSW')
         db_name: Path to the database file
+        data_dir: Path to the Standard data directory
         silent_mode: If True, suppress progress messages
     """
+    if data_dir is None:
+        raise ValueError("data_dir parameter is required")
     # Connect to the database with a 600-second timeout for large state loads
     conn = sqlite3.connect(db_name, timeout=600.0)
     # Enable foreign key constraints and WAL mode for better concurrency
@@ -194,12 +196,12 @@ def load_data(state, db_name='gnaf_addresses.db', silent_mode=False):
     # Initialize progress tracker (pre-scans files to count total rows)
     # Disable progress in test environment to avoid cluttering test output
     show_progress = os.environ.get('GNAF_SHOW_PROGRESS', '1') == '1'
-    progress = ProgressTracker(state, STATE_TABLES_ORDERED, DATA_DIR) if show_progress else None
+    progress = ProgressTracker(state, STATE_TABLES_ORDERED, data_dir) if show_progress else None
 
     # Load all state tables in dependency order
     for table_index, table_name in enumerate(STATE_TABLES_ORDERED):
         psv_file = f'{state}_{table_name}_psv.psv'
-        file_path = os.path.join(DATA_DIR, psv_file)
+        file_path = os.path.join(data_dir, psv_file)
         if not silent_mode:
             print(f"Loading {state} data into {table_name}...")
 

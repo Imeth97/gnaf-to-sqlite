@@ -9,14 +9,14 @@ from create_database import (
 
 def test_database_file_created(mock_data_dir, clean_test_db):
     """Test that the database file is created."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     assert os.path.exists(clean_test_db), "Database file should be created"
 
 
 def test_tables_created(mock_data_dir, clean_test_db):
     """Test that all 35 tables are created (16 authority + 19 state)."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -43,7 +43,7 @@ def test_tables_created(mock_data_dir, clean_test_db):
 
 def test_primary_keys(mock_data_dir, clean_test_db):
     """Test that primary key constraints are applied to all tables."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -74,7 +74,7 @@ def test_primary_keys(mock_data_dir, clean_test_db):
 
 def test_foreign_keys(mock_data_dir, clean_test_db):
     """Test that foreign key constraints are defined on ADDRESS_DETAIL."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -100,7 +100,7 @@ def test_foreign_keys(mock_data_dir, clean_test_db):
 
 def test_column_count(mock_data_dir, clean_test_db):
     """Test that tables have the correct number of columns (including STATE column)."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -135,7 +135,7 @@ def test_existing_db_removed(mock_data_dir, tmp_path):
     conn.close()
 
     # Now call create_database which should remove the old one
-    create_database(str(db_path), reference_state='TEST')
+    create_database(str(db_path), data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     # Verify the old table doesn't exist
     conn = sqlite3.connect(str(db_path))
@@ -149,7 +149,7 @@ def test_existing_db_removed(mock_data_dir, tmp_path):
 
 def test_all_columns_text_type(mock_data_dir, clean_test_db):
     """Test that all columns are TEXT type."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -177,7 +177,7 @@ def test_all_columns_text_type(mock_data_dir, clean_test_db):
 
 def test_state_column_exists(mock_data_dir, clean_test_db):
     """Test that STATE column exists in all tables and is NOT NULL."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -208,7 +208,7 @@ def test_state_column_exists(mock_data_dir, clean_test_db):
 
 def test_authority_code_tables_no_state_column(mock_data_dir, clean_test_db):
     """Test that all 16 authority code tables have no STATE column."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -224,7 +224,7 @@ def test_authority_code_tables_no_state_column(mock_data_dir, clean_test_db):
 
 def test_state_tables_have_state_column(mock_data_dir, clean_test_db):
     """Test that all 19 state tables have a NOT NULL STATE column."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -241,7 +241,7 @@ def test_state_tables_have_state_column(mock_data_dir, clean_test_db):
 
 def test_all_primary_keys_defined(mock_data_dir, clean_test_db):
     """Test that all 35 tables have the correct primary key column."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -260,7 +260,7 @@ def test_all_primary_keys_defined(mock_data_dir, clean_test_db):
 
 def test_all_foreign_keys_defined(mock_data_dir, clean_test_db):
     """Test that all foreign key relationships are defined correctly."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -280,7 +280,7 @@ def test_all_foreign_keys_defined(mock_data_dir, clean_test_db):
 
 def test_authority_code_table_pk_is_code(mock_data_dir, clean_test_db):
     """Test that all authority code tables use CODE as primary key."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -299,7 +299,7 @@ def test_authority_code_table_pk_is_code(mock_data_dir, clean_test_db):
 
 def test_table_count_by_type(mock_data_dir, clean_test_db):
     """Test that database has exactly 16 authority + 19 state = 35 tables."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     assert len(AUTHORITY_CODE_TABLES) == 16, f"Should have 16 authority tables, got {len(AUTHORITY_CODE_TABLES)}"
     assert len(STATE_TABLES_ORDERED) == 19, f"Should have 19 state tables, got {len(STATE_TABLES_ORDERED)}"
@@ -320,7 +320,7 @@ def test_table_count_by_type(mock_data_dir, clean_test_db):
 
 def test_wal_mode_enabled(mock_data_dir, clean_test_db):
     """Test that WAL mode is enabled after database creation."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()

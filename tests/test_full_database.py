@@ -8,7 +8,7 @@ from add_indexes import add_indexes
 
 def test_full_database_creation(mock_data_dir, clean_test_db):
     """Test end-to-end database creation with all 35 tables."""
-    create_database(clean_test_db, reference_state='TEST')
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -21,9 +21,9 @@ def test_full_database_creation(mock_data_dir, clean_test_db):
 
 def test_authority_codes_load_once(mock_data_dir, clean_test_db):
     """Test that authority codes load correctly and only once (idempotent)."""
-    create_database(clean_test_db, reference_state='TEST')
-    load_authority_codes(clean_test_db)
-    load_authority_codes(clean_test_db)  # Second call - should not duplicate
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
+    load_authority_codes(clean_test_db, authority_code_dir=mock_data_dir)
+    load_authority_codes(clean_test_db, authority_code_dir=mock_data_dir)  # Second call - should not duplicate
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -38,9 +38,9 @@ def test_authority_codes_load_once(mock_data_dir, clean_test_db):
 
 def test_single_state_full_load(mock_data_dir, clean_test_db):
     """Test loading all 19 state tables for one state."""
-    create_database(clean_test_db, reference_state='TEST')
-    load_authority_codes(clean_test_db)
-    load_data('TEST', clean_test_db)
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
+    load_authority_codes(clean_test_db, authority_code_dir=mock_data_dir)
+    load_data('TEST', clean_test_db, data_dir=mock_data_dir)
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -55,10 +55,10 @@ def test_single_state_full_load(mock_data_dir, clean_test_db):
 
 def test_multi_state_load_differentiation(mock_multi_state_dir, clean_test_db):
     """Test loading two states and verify STATE column isolates data correctly."""
-    create_database(clean_test_db, reference_state='TEST')
-    load_authority_codes(clean_test_db)
-    load_data('TEST', clean_test_db)
-    load_data('OT1', clean_test_db)
+    create_database(clean_test_db, data_dir=mock_multi_state_dir, authority_code_dir=mock_multi_state_dir, reference_state='TEST')
+    load_authority_codes(clean_test_db, authority_code_dir=mock_multi_state_dir)
+    load_data('TEST', clean_test_db, data_dir=mock_multi_state_dir)
+    load_data('OT1', clean_test_db, data_dir=mock_multi_state_dir)
 
     conn = sqlite3.connect(clean_test_db)
     cursor = conn.cursor()
@@ -77,9 +77,9 @@ def test_multi_state_load_differentiation(mock_multi_state_dir, clean_test_db):
 
 def test_all_indexes_created(mock_data_dir, clean_test_db):
     """Test that all performance indexes are created by add_indexes."""
-    create_database(clean_test_db, reference_state='TEST')
-    load_authority_codes(clean_test_db)
-    load_data('TEST', clean_test_db)
+    create_database(clean_test_db, data_dir=mock_data_dir, authority_code_dir=mock_data_dir, reference_state='TEST')
+    load_authority_codes(clean_test_db, authority_code_dir=mock_data_dir)
+    load_data('TEST', clean_test_db, data_dir=mock_data_dir)
     add_indexes(clean_test_db)
 
     conn = sqlite3.connect(clean_test_db)

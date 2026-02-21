@@ -7,8 +7,12 @@ import sys
 import os
 
 STATES = ['ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA', 'OT']
-UNIFIED_DB_NAME = 'gnaf_addresses.db'
 SILENT_MODE = True  # Set to False to see detailed progress logs
+
+# Global variables for paths (set from command-line args)
+UNIFIED_DB_NAME = None
+DATA_DIR = None
+AUTHORITY_CODE_DIR = None
 
 def get_loaded_states(db_name):
     """Check which states already have data loaded in the database."""
@@ -39,13 +43,35 @@ def process_state_data(state):
     try:
         if not SILENT_MODE:
             print(f"Loading data for {state}...")
-        load_data(state, UNIFIED_DB_NAME, silent_mode=SILENT_MODE)
+        load_data(state, UNIFIED_DB_NAME, data_dir=DATA_DIR, silent_mode=SILENT_MODE)
         return state, True
     except Exception as e:
         return state, f"Error loading {state}: {str(e)}"
 
 
 if __name__ == "__main__":
+    # Parse command-line arguments
+    if len(sys.argv) < 3:
+        print("Usage: python setup_db.py <output_db_path> <gnaf_base_path>")
+        print("Example: python setup_db.py out/gnaf.sqlite 'g-naf_nov25_allstates_gda2020_psv_1021/G-NAF/G-NAF NOVEMBER 2025'")
+        sys.exit(1)
+
+    UNIFIED_DB_NAME = sys.argv[1]
+    gnaf_base_path = sys.argv[2]
+
+    # Construct subdirectory paths
+    DATA_DIR = os.path.join(gnaf_base_path, 'Standard')
+    AUTHORITY_CODE_DIR = os.path.join(gnaf_base_path, 'Authority Code')
+
+    # Validate that the paths exist
+    if not os.path.exists(DATA_DIR):
+        print(f"❌ Error: Standard data directory not found at: {DATA_DIR}")
+        sys.exit(1)
+
+    if not os.path.exists(AUTHORITY_CODE_DIR):
+        print(f"❌ Error: Authority Code directory not found at: {AUTHORITY_CODE_DIR}")
+        sys.exit(1)
+
     # Check which states are already loaded
     loaded_states = get_loaded_states(UNIFIED_DB_NAME)
 
@@ -59,13 +85,13 @@ if __name__ == "__main__":
     if not os.path.exists(UNIFIED_DB_NAME):
         if not SILENT_MODE:
             print("\nStep 1: Creating unified database schema (35 tables)...")
-        create_database(UNIFIED_DB_NAME)
+        create_database(UNIFIED_DB_NAME, data_dir=DATA_DIR, authority_code_dir=AUTHORITY_CODE_DIR)
         if not SILENT_MODE:
             print(f"✓ Schema created in {UNIFIED_DB_NAME}")
 
         if not SILENT_MODE:
             print("\nStep 2: Loading authority code tables (16 lookup tables)...")
-        load_authority_codes(UNIFIED_DB_NAME, silent_mode=SILENT_MODE)
+        load_authority_codes(UNIFIED_DB_NAME, authority_code_dir=AUTHORITY_CODE_DIR, silent_mode=SILENT_MODE)
         if not SILENT_MODE:
             print(f"✓ Authority codes loaded\n")
     else:
@@ -81,7 +107,7 @@ if __name__ == "__main__":
             if count == 0:
                 if not SILENT_MODE:
                     print("Step 2: Loading authority code tables (missing)...")
-                load_authority_codes(UNIFIED_DB_NAME, silent_mode=SILENT_MODE)
+                load_authority_codes(UNIFIED_DB_NAME, authority_code_dir=AUTHORITY_CODE_DIR, silent_mode=SILENT_MODE)
                 if not SILENT_MODE:
                     print(f"✓ Authority codes loaded\n")
         except sqlite3.Error:
