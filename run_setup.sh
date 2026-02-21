@@ -71,6 +71,7 @@ echo "---------------------------------------------"
 echo "This process can take approximately ~1 hour to complete."
 echo "There is currently NO checkpointing or resume capability."
 echo "If you interrupt the process, you will need to start again from scratch."
+echo "Resulting SQLite DB will be ~18GB - ensure you have disk space."
 echo ""
 
 # -------- Confirm --------

@@ -1,5 +1,7 @@
 # GNAF to SQL
 
+Convert the official G-NAF dataset into a high-performance local SQLite database and extract a clean, ready-to-use list of Australian property addresses.
+
 ## Usage
 
 ```bash
@@ -20,6 +22,7 @@
 - Process takes approximately 1 hour to complete
 - No checkpointing - interruption requires restart from scratch
 - Any existing database at output path will be overwritten
+- Resulting SQLite DB will be ~18GB 
 
 ## Post-Processing: Freestanding Property Addresses
 
@@ -39,3 +42,9 @@ VIC | GAVIC789012 | 15a-jones-road-melbourne-vic-3000
 ```
 
 This file contains only detached/freestanding properties (addresses where `FLAT_TYPE_CODE IS NULL`), making it useful for identifying standalone residential properties. 
+
+
+This project uses the Geocoded National Address File (G-NAF) dataset, which is licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+Users of this tool must comply with the G-NAF licensing terms when using the dataset or any derived outputs.
+
+GNAF Dataset: https://data.gov.au/data/dataset/geocoded-national-address-file-g-naf
