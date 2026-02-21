@@ -97,3 +97,37 @@ python3 "$SCRIPT_NAME" "$DB_PATH" "$GNAF_BASE_PATH"
 echo ""
 echo "✅ Database build complete!"
 echo "Location: $DB_PATH"
+echo ""
+
+# -------- Post-processing options --------
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Post-Processing Options:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "1) Exit now"
+echo "2) Generate list of freestanding property addresses"
+echo ""
+read -p "Choose an option (1 or 2): " POST_OPTION
+
+if [[ "$POST_OPTION" == "2" ]]; then
+  echo ""
+  echo "🏠 Generating freestanding property addresses..."
+  echo ""
+
+  # Check if the additional script exists
+  if [ ! -f "additional/process_addresses.py" ]; then
+    echo "❌ Error: additional/process_addresses.py not found"
+    exit 1
+  fi
+
+  # Execute the address processing script with the database path
+  python3 "additional/process_addresses.py" "$DB_PATH"
+
+  echo ""
+  echo "✅ Address processing complete!"
+elif [[ "$POST_OPTION" == "1" ]]; then
+  echo ""
+  echo "👋 Exiting..."
+else
+  echo ""
+  echo "⚠️  Invalid option. Exiting..."
+fi
